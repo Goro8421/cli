@@ -36,9 +36,9 @@ func TestSendTelemetryPostsToFakeCentral(t *testing.T) {
 	event := &telemetry.Event{
 		EventType: "usage",
 		Dimensions: telemetry.Dimensions{
-			Command:      "pr create",
+			Command:      "gh pr create",
 			DeviceID:     "abc123hashed",
-			Platform:     "darwin",
+			OS:           "darwin",
 			Architecture: "arm64",
 			Version:      "2.45.0",
 		},
@@ -71,11 +71,11 @@ func TestSendTelemetryPostsToFakeCentral(t *testing.T) {
 	if received.EventType != "usage" {
 		t.Errorf("expected eventType 'usage', got %q", received.EventType)
 	}
-	if received.Dimensions.Command != "pr create" {
-		t.Errorf("expected command 'pr create', got %q", received.Dimensions.Command)
+	if received.Dimensions.Command != "gh pr create" {
+		t.Errorf("expected command 'gh pr create', got %q", received.Dimensions.Command)
 	}
-	if received.Dimensions.Platform != "darwin" {
-		t.Errorf("expected platform 'darwin', got %q", received.Dimensions.Platform)
+	if received.Dimensions.OS != "darwin" {
+		t.Errorf("expected platform 'darwin', got %q", received.Dimensions.OS)
 	}
 	if received.Dimensions.Architecture != "arm64" {
 		t.Errorf("expected architecture 'arm64', got %q", received.Dimensions.Architecture)
@@ -121,7 +121,7 @@ func TestEventRoundTrip(t *testing.T) {
 		EventType: "usage",
 		Dimensions: telemetry.Dimensions{
 			Command:      "issue create",
-			Platform:     "linux",
+			OS:           "linux",
 			Architecture: "amd64",
 			Version:      "2.44.0",
 		},

@@ -14,6 +14,11 @@ import (
 
 const defaultCentralEndpointURL = "https://central.github.com/api/usage/github-cli"
 
+type SendTelemetryOptions struct {
+	CentralEndpointURL string
+	PayloadJSON        string
+}
+
 func NewCmdSendTelemetry(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:    "send-telemetry",
@@ -25,7 +30,12 @@ func NewCmdSendTelemetry(f *cmdutil.Factory) *cobra.Command {
 			if v := os.Getenv("CENTRAL_ENDPOINT_URL"); v != "" {
 				endpointURL = v
 			}
-			return sendTelemetry(endpointURL, args[0])
+
+			opts := &SendTelemetryOptions{
+				CentralEndpointURL: endpointURL,
+				PayloadJSON:        args[0],
+			}
+			return runSendTelemetry(opts)
 		},
 	}
 
@@ -34,18 +44,17 @@ func NewCmdSendTelemetry(f *cmdutil.Factory) *cobra.Command {
 	return cmd
 }
 
-func sendTelemetry(endpointURL, payloadJSON string) error {
-	// Validate that the payload is a well-formed Event.
+func runSendTelemetry(opts *SendTelemetryOptions) error {
 	var event telemetry.Event
-	if err := json.Unmarshal([]byte(payloadJSON), &event); err != nil {
-		return nil //nolint:nilerr // Best effort telemetry — silently discard bad payloads.
+	if err := json.Unmarshal([]byte(opts.PayloadJSON), &event); err != nil {
+		return nil //nolint:nilerr // Best effort telemetry.
 	}
 
 	client := &http.Client{
 		Timeout: 5 * time.Second,
 	}
 
-	req, err := http.NewRequest(http.MethodPost, endpointURL, strings.NewReader(payloadJSON))
+	req, err := http.NewRequest(http.MethodPost, opts.CentralEndpointURL, strings.NewReader(opts.PayloadJSON))
 	if err != nil {
 		return nil //nolint:nilerr // Best effort telemetry.
 	}
